@@ -48,6 +48,8 @@ struct BuildArgs {
     debug: bool,
     #[arg(short = 's', long = "static-syscalls", help = "Use static syscalls")]
     static_syscalls: bool,
+    #[arg(short = 'd', long, help = "Output deploy directory")]
+    deploy_dir: Option<String>,
 }
 
 #[derive(Args)]
@@ -73,11 +75,11 @@ fn main() -> Result<(), Error> {
 
     match &cli.command {
         Commands::Init(args) => init(args.name.clone(), args.ts_tests),
-        Commands::Build(args) => build(args.debug, args.static_syscalls),
+        Commands::Build(args) => build(args.debug, args.static_syscalls, args.deploy_dir.clone()),
         Commands::Deploy(args) => deploy(args.name.clone(), args.url.clone()),
         Commands::Test => test(),
         Commands::E2E(args) => {
-            build(false, false)?; // E2E uses release build
+            build(false, false, Some("deploy".to_string()))?; // E2E uses release build
             deploy(args.name.clone(), args.url.clone())?;
             test()
         }

@@ -42,10 +42,10 @@ impl AsDiagnostic for CompileError {
     }
 }
 
-pub fn build(debug: bool, static_syscalls: bool) -> Result<()> {
+pub fn build(debug: bool, static_syscalls: bool, deploy_dir: Option<String>) -> Result<()> {
     // Set src/out directory
     let src = "src";
-    let deploy = "deploy";
+    let deploy = deploy_dir.as_deref().unwrap_or("deploy");
 
     // Create necessary directories
     create_dir_all(deploy)?;
