@@ -34,7 +34,10 @@ impl Program {
         let mut elf_header = ElfHeader::new();
         let mut program_headers = None;
 
-        let has_rodata = data_section.size() > 0;
+        let bytecode_size = code_section.size();
+        let rodata_size = data_section.size();
+
+        let has_rodata = rodata_size > 0;
         let ph_count = if arch.is_v3() {
             if has_rodata { 2 } else { 1 }
         } else if prog_is_static {
@@ -48,9 +51,7 @@ impl Program {
 
         // save read + execute size for program header before
         // ownership of code/data sections is transferred
-        let text_size = code_section.size() + data_section.size();
-        let bytecode_size = code_section.size();
-        let rodata_size = data_section.size();
+        let text_size = bytecode_size + rodata_size;
 
         // Calculate base offset after ELF header and program headers
         let base_offset = 64 + (ph_count as u64 * 56); // 64 bytes ELF header, 56 bytes per program header
