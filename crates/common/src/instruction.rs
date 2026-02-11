@@ -9,7 +9,6 @@ use {
     core::ops::Range,
     either::Either,
     serde::{Deserialize, Serialize},
-    syscall_map::murmur3_32,
 };
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

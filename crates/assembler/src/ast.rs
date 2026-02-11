@@ -11,9 +11,9 @@ use {
         inst_param::{Number, Register},
         instruction::Instruction,
         opcode::Opcode,
-        syscalls_map::murmur3_32,
     },
     std::collections::HashMap,
+    syscall_map::murmur3_32,
 };
 
 #[derive(Default, Debug)]
