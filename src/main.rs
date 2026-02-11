@@ -1,8 +1,15 @@
 pub mod commands;
 use {
     anyhow::Error,
-    clap::{Args, Parser, Subcommand},
-    commands::{build, clean, deploy, disassemble, init, test},
+    clap::{Parser, Subcommand},
+    commands::{
+        build::{build, BuildArgs},
+        clean::clean,
+        deploy::{deploy, DeployArgs},
+        disassemble::{disassemble, DisassembleArgs},
+        init::{init, InitArgs},
+        test::test,
+    },
 };
 
 #[derive(Parser)]
@@ -31,59 +38,20 @@ enum Commands {
     Disassemble(DisassembleArgs),
 }
 
-#[derive(Args)]
-pub struct InitArgs {
-    name: Option<String>,
-    #[arg(
-        short,
-        long = "ts-tests",
-        help = "Initialize with TypeScript tests instead of Mollusk Rust tests"
-    )]
-    ts_tests: bool,
-}
-
-#[derive(Args)]
-struct BuildArgs {
-    #[arg(short = 'g', long, help = "Include debug information")]
-    debug: bool,
-    #[arg(short = 's', long = "static-syscalls", help = "Use static syscalls")]
-    static_syscalls: bool,
-    #[arg(short = 'd', long, help = "Output deploy directory")]
-    deploy_dir: Option<String>,
-}
-
-#[derive(Args)]
-struct DeployArgs {
-    name: Option<String>,
-    url: Option<String>,
-}
-
-#[derive(Args)]
-struct LinkArgs {
-    source: Option<String>,
-}
-
-#[derive(Args)]
-struct DisassembleArgs {
-    filename: String,
-    #[arg(short, long)]
-    debug: bool,
-}
-
 fn main() -> Result<(), Error> {
     let cli = Cli::parse();
 
-    match &cli.command {
-        Commands::Init(args) => init(args.name.clone(), args.ts_tests),
-        Commands::Build(args) => build(args.debug, args.static_syscalls, args.deploy_dir.clone()),
-        Commands::Deploy(args) => deploy(args.name.clone(), args.url.clone()),
+    match cli.command {
+        Commands::Init(args) => init(args),
+        Commands::Build(args) => build(args),
+        Commands::Deploy(args) => deploy(args),
         Commands::Test => test(),
         Commands::E2E(args) => {
-            build(false, false, Some("deploy".to_string()))?; // E2E uses release build
-            deploy(args.name.clone(), args.url.clone())?;
+            build(BuildArgs::default())?;
+            deploy(args)?;
             test()
         }
         Commands::Clean => clean(),
-        Commands::Disassemble(args) => disassemble(args.filename.clone(), args.debug),
+        Commands::Disassemble(args) => disassemble(args),
     }
 }
