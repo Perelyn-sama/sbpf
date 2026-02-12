@@ -8,7 +8,7 @@ use {
     },
     ed25519_dalek::SigningKey,
     rand::rngs::OsRng,
-    sbpf_assembler::{Assembler, AssemblerOption, DebugMode, errors::CompileError},
+    sbpf_assembler::{Assembler, AssemblerOption, DebugMode, SbpfArch, errors::CompileError},
     std::{fs, fs::create_dir_all, path::Path, time::Instant},
     termcolor::{ColorChoice, StandardStream},
 };
@@ -60,9 +60,8 @@ pub fn build(args: BuildArgs) -> Result<()> {
 
     // Create necessary directories
     create_dir_all(deploy)?;
-
     // Function to compile assembly
-    fn compile_assembly(src: &str, deploy: &str, debug: bool, static_syscalls: bool) -> Result<()> {
+    fn compile_assembly(src: &str, deploy: &str, debug: bool, arch: SbpfArch) -> Result<()> {
         let source_code = std::fs::read_to_string(src).unwrap();
         let file = SimpleFile::new(src.to_string(), source_code.clone());
 
@@ -85,10 +84,7 @@ pub fn build(args: BuildArgs) -> Result<()> {
             None
         };
 
-        let options = AssemblerOption {
-            use_static_syscalls: static_syscalls,
-            debug_mode,
-        };
+        let options = AssemblerOption { arch, debug_mode };
 
         let assembler = Assembler::new(options);
         let result = assembler.assemble(&source_code);
