@@ -1,6 +1,5 @@
 use {
     anyhow::{Error, Result},
-    sbpf_assembler::SbpfArch,
     std::{fs, io, path::Path, process::Command},
 };
 

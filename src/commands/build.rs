@@ -1,6 +1,6 @@
 use {
     anyhow::{Error, Result},
-    clap::Args,
+    clap::{Args, ValueEnum},
     codespan_reporting::{
         diagnostic::{Diagnostic, Label},
         files::SimpleFile,
@@ -17,10 +17,31 @@ use {
 pub struct BuildArgs {
     #[arg(short = 'g', long, help = "Include debug information")]
     pub debug: bool,
-    #[arg(short = 's', long = "static-syscalls", help = "Use static syscalls")]
-    pub static_syscalls: bool,
+    #[arg(
+        short = 'a',
+        long,
+        default_value = "v0",
+        help = "Target architecture (v0 or v3)"
+    )]
+    arch: ArchArg,
     #[arg(short = 'd', long, help = "Output deploy directory")]
     pub deploy_dir: Option<String>,
+}
+
+#[derive(Clone, Copy, ValueEnum, Default)]
+pub enum ArchArg {
+    #[default]
+    V0,
+    V3,
+}
+
+impl From<ArchArg> for SbpfArch {
+    fn from(arg: ArchArg) -> Self {
+        match arg {
+            ArchArg::V0 => SbpfArch::V0,
+            ArchArg::V3 => SbpfArch::V3,
+        }
+    }
 }
 
 pub trait AsDiagnostic {
@@ -166,7 +187,7 @@ pub fn build(args: BuildArgs) -> Result<()> {
                     if args.debug { " (debug)" } else { "" }
                 );
                 let start = Instant::now();
-                compile_assembly(&asm_file, deploy, args.debug, args.static_syscalls)?;
+                compile_assembly(&asm_file, deploy, args.debug, args.arch.into())?;
                 let duration = start.elapsed();
                 println!(
                     "✅ \"{}\" built successfully in {}ms!",

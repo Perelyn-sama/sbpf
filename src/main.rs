@@ -3,11 +3,11 @@ use {
     anyhow::Error,
     clap::{Parser, Subcommand},
     commands::{
-        build::{build, BuildArgs},
+        build::{BuildArgs, build},
         clean::clean,
-        deploy::{deploy, DeployArgs},
-        disassemble::{disassemble, DisassembleArgs},
-        init::{init, InitArgs},
+        deploy::{DeployArgs, deploy},
+        disassemble::{DisassembleArgs, disassemble},
+        init::{InitArgs, init},
         test::test,
     },
 };
